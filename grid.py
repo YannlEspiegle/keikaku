@@ -13,7 +13,7 @@ class Morpion:
         self.grille = [[0] * 3 for _ in range(3)]
 
     # TODO faire une belle fonction
-    def check_end(self):
+    def check_gagne(self):
         for i in range(3):
             if self.grille[0][i] == self.grille[1][i] == self.grille[2][i] != 0:
                 return True
@@ -25,18 +25,29 @@ class Morpion:
             return True
         return False
 
+    def check_egalite(self):
+        for ligne in self.grille:
+            for case in ligne:
+                if case == 0:
+                    return False
+        return True
+
     def click(self, x, y, symbole):
         x_pos, y_pos = (x - self.x) // TAILLE_CASE, (y - self.y) // TAILLE_CASE
         if self.grille[y_pos][x_pos] == 0:
             self.grille[y_pos][x_pos] = symbole
-            if self.check_end():
+            if self.check_gagne():
                 self.fini = True
                 self.winner = symbole
+            elif self.check_egalite():
+                self.fini = True
             return (x_pos, y_pos)
         return (-1, -1)
 
-    # TODO quand le morpion est gagné, ne montrer que le symbole gagnant
     def draw(self, scr):
+        if self.fini:
+            self.draw_fini(scr)
+            return
         # lignes verticales
         pygame.draw.line(scr, BLACK, (self.x + TAILLE_CASE, self.y), (self.x + TAILLE_CASE, self.y + TAILLE_MORP))
         pygame.draw.line(scr, BLACK, (self.x + 2*TAILLE_CASE, self.y), (self.x + 2*TAILLE_CASE, self.y + TAILLE_MORP))
@@ -55,6 +66,16 @@ class Morpion:
                     scr.blit(image_croix, coords)
                 elif self.grille[y][x] == ROND:
                     scr.blit(image_rond, coords)
+
+    def draw_fini(self, scr):
+        if self.winner == CROIX:
+            image_croix = pygame.transform.scale(IMAGE_CROIX, (TAILLE_MORP,)*2)
+            scr.blit(image_croix, (self.x, self.y))
+        elif self.winner == ROND:
+            image_rond = pygame.transform.scale(IMAGE_ROND, (TAILLE_MORP,)*2)
+            scr.blit(image_rond, (self.x, self.y))
+        else:
+            pygame.draw.polygon(scr, BLACK, [(self.x, self.y), (self.x+TAILLE_MORP, self.y), (self.x+TAILLE_MORP, self.y+TAILLE_MORP), (self.x, self.y+TAILLE_MORP)])
 
 
 class Grid:
